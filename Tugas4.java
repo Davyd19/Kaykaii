@@ -55,27 +55,12 @@ class Penjualan extends Faktur {
 }
 
 public class Tugas4 {
+    private static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        boolean validInput = false; // Flag untuk menandakan input yang valid
-
-        while (!validInput) {
+        while (true) {
             try {
-                System.out.print("Masukkan Kode Barang: ");
-                String kodeBarang = scanner.nextLine();
-                System.out.print("Masukkan Nama Barang: ");
-                String namaBarang = scanner.nextLine();
-                System.out.print("Masukkan Harga Barang: ");
-                double hargaBarang = scanner.nextDouble();
-                System.out.print("Masukkan Jumlah Beli: ");
-                int jumlahBeli = scanner.nextInt();
-
-                // Membuat objek Penjualan
-                Penjualan penjualan = new Penjualan(kodeBarang, namaBarang, hargaBarang, jumlahBeli);
-                penjualan.display();
-                
-                validInput = true; // Jika berhasil, set validInput ke true untuk keluar dari loop
-
+                inputFaktur();
             } catch (InputMismatchException e) {
                 System.out.println("Error: Input tidak sesuai. Pastikan untuk memasukkan angka untuk harga dan jumlah beli.");
                 scanner.nextLine(); // Menghapus input yang salah
@@ -83,9 +68,41 @@ public class Tugas4 {
                 System.out.println("Error: " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("Terjadi kesalahan: " + e.getMessage());
+            } finally {
+                // Menanyakan kepada pengguna apakah ingin memasukkan faktur lagi
+                String response = "";
+                boolean validInput = false;
+                while (!validInput) {
+                    System.out.println("");
+                    System.out.print("Apakah Anda ingin memasukkan faktur lagi? (y/n): ");
+                    response = scanner.nextLine();
+                    if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("n")) {
+                        validInput = true; // Input valid, keluar dari loop
+                    } else {
+                        System.out.println("Error: Harap masukkan 'y' untuk ya atau 'n' untuk tidak.");
+                    }
+                }
+                if (response.equalsIgnoreCase("n")) {
+                    break; // Keluar dari loop jika pengguna tidak ingin melanjutkan
+                }
             }
         }
-
         scanner.close(); // Menutup scanner untuk menghindari kebocoran sumber daya
+    }
+
+    private static void inputFaktur() {
+        System.out.print("Masukkan Kode Barang: ");
+        String kodeBarang = scanner.nextLine();
+        System.out.print("Masukkan Nama Barang: ");
+        String namaBarang = scanner.nextLine();
+        System.out.print("Masukkan Harga Barang: ");
+        double hargaBarang = scanner.nextDouble();
+        System.out.print("Masukkan Jumlah Beli: ");
+        int jumlahBeli = scanner.nextInt();
+        scanner.nextLine(); // Menghapus newline yang tersisa
+
+        // Membuat objek Penjualan
+        Penjualan penjualan = new Penjualan(kodeBarang, namaBarang, hargaBarang, jumlahBeli);
+        penjualan.display();
     }
 }
