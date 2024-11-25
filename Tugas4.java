@@ -1,10 +1,13 @@
 package Tugas4;
 
-import java.util.Scanner;
+import java.util.Date;
 import java.util.InputMismatchException;
+import java.util.Random;
+import java.util.Scanner;
+import java.text.SimpleDateFormat;
 
 class Faktur {
-    private static int noFakturCounter = 1; // Counter untuk no faktur
+    private static int noFakturCounter = 1; // Counter untuk nomor faktur
     protected int noFaktur; // Nomor faktur
     protected String kodeBarang;
     protected String namaBarang;
@@ -12,7 +15,7 @@ class Faktur {
     protected int jumlahBeli;
 
     public Faktur(String kodeBarang, String namaBarang, double hargaBarang, int jumlahBeli) {
-        this.noFaktur = noFakturCounter++; // Otomatis dan tidak dapat diubah
+        this.noFaktur = noFakturCounter++; // Otomatis bertambah
         this.kodeBarang = kodeBarang;
         this.namaBarang = namaBarang;
         this.hargaBarang = hargaBarang;
@@ -26,7 +29,7 @@ class Faktur {
 
 class Penjualan extends Faktur {
     public Penjualan(String kodeBarang, String namaBarang, double hargaBarang, int jumlahBeli) {
-        super(kodeBarang, namaBarang, hargaBarang, jumlahBeli); // Memanggil constructor dari kelas Faktur
+        super(kodeBarang, namaBarang, hargaBarang, jumlahBeli);
 
         // Validasi input
         if (kodeBarang == null || kodeBarang.isEmpty()) {
@@ -38,59 +41,100 @@ class Penjualan extends Faktur {
         if (hargaBarang < 0) {
             throw new IllegalArgumentException("Harga barang harus positif.");
         }
-        if (jumlahBeli < 0) {
-            throw new IllegalArgumentException("Jumlah beli harus positif.");
+        if (jumlahBeli <= 0) {
+            throw new IllegalArgumentException("Jumlah beli harus lebih dari 0.");
         }
     }
 
-    public void display() {
-        System.out.println("");
+    public void display(String namaKasir) {
+        System.out.println("+----------------------------------------------------+");
         System.out.println("No Faktur: " + noFaktur);
         System.out.println("Kode Barang: " + kodeBarang);
         System.out.println("Nama Barang: " + namaBarang);
         System.out.println("Harga Barang: " + hargaBarang);
         System.out.println("Jumlah Beli: " + jumlahBeli);
-        System.out.println("Total: " + total());
+        System.out.println("TOTAL: " + total());
+        System.out.println("+----------------------------------------------------+");
+        System.out.println("Kasir: " + namaKasir);
+        System.out.println("+----------------------------------------------------+");
     }
 }
 
 public class Tugas4 {
     private static Scanner scanner = new Scanner(System.in);
+    private static Random random = new Random();
 
     public static void main(String[] args) {
+        while (!login()) {
+            System.out.println("Login gagal. Silakan coba lagi.\n");
+        }
+
+        String namaKasir = "Davyd Yehuda";
+        System.out.println("\nSelamat Datang di Supermarket");
+        displayTanggalDanWaktu();
+        System.out.println("+----------------------------------------------------+");
+
         while (true) {
             try {
-                inputFaktur();
+                inputFaktur(namaKasir);
             } catch (InputMismatchException e) {
-                System.out.println("Error: Input tidak sesuai. Pastikan untuk memasukkan angka untuk harga dan jumlah beli.");
+                System.out.println("Error: Pastikan harga dan jumlah beli berupa angka.");
                 scanner.nextLine(); // Menghapus input yang salah
             } catch (IllegalArgumentException e) {
                 System.out.println("Error: " + e.getMessage());
             } catch (Exception e) {
                 System.out.println("Terjadi kesalahan: " + e.getMessage());
-            } finally {
-                // Menanyakan kepada pengguna apakah ingin memasukkan faktur lagi
-                String response = "";
-                boolean validInput = false;
-                while (!validInput) {
-                    System.out.println("");
-                    System.out.print("Apakah Anda ingin memasukkan faktur lagi? (y/n): ");
-                    response = scanner.nextLine();
-                    if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("n")) {
-                        validInput = true; // Input valid, keluar dari loop
-                    } else {
-                        System.out.println("Error: Harap masukkan 'y' untuk ya atau 'n' untuk tidak.");
-                    }
-                }
-                if (response.equalsIgnoreCase("n")) {
-                    break; // Keluar dari loop jika pengguna tidak ingin melanjutkan
-                }
+            }
+
+            System.out.print("Apakah ingin transaksi lain? (y/n): ");
+            String response = scanner.nextLine();
+            if (response.equalsIgnoreCase("n")) {
+                break;
             }
         }
-        scanner.close(); // Menutup scanner untuk menghindari kebocoran sumber daya
+
+        System.out.println("Terima kasih telah berbelanja!");
+        scanner.close();
     }
 
-    private static void inputFaktur() {
+    private static boolean login() {
+        String username = "admin";
+        String password = "1234";
+        String captcha = generateCaptcha();
+
+        System.out.println("+----------------------------------------------------+");
+        System.out.print("Username: ");
+        String inputUsername = scanner.nextLine().trim(); // Menggunakan trim untuk menghapus spasi tambahan
+        System.out.print("Password: ");
+        String inputPassword = scanner.nextLine();
+        System.out.println("Captcha: " + captcha);
+        System.out.print("Masukkan Captcha: ");
+        String inputCaptcha = scanner.nextLine();
+
+        if (inputUsername.equals(username) && inputPassword.equals(password) && inputCaptcha.equalsIgnoreCase(captcha)) {
+            System.out.println("Login berhasil.");
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static String generateCaptcha() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder captcha = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            captcha.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return captcha.toString();
+    }
+
+    private static void displayTanggalDanWaktu() {
+        Date now = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy HH:mm:ss");
+        System.out.println("Tanggal dan Waktu: " + formatter.format(now));
+    }
+
+    private static void inputFaktur(String namaKasir) {
         System.out.print("Masukkan Kode Barang: ");
         String kodeBarang = scanner.nextLine();
         System.out.print("Masukkan Nama Barang: ");
@@ -101,8 +145,7 @@ public class Tugas4 {
         int jumlahBeli = scanner.nextInt();
         scanner.nextLine(); // Menghapus newline yang tersisa
 
-        // Membuat objek Penjualan
         Penjualan penjualan = new Penjualan(kodeBarang, namaBarang, hargaBarang, jumlahBeli);
-        penjualan.display();
+        penjualan.display(namaKasir);
     }
 }
